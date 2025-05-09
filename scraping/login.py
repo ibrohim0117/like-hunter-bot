@@ -4,8 +4,10 @@ import time
 
 SESSION_PATH = "data/sessions/ig_login.json"
 
-
 def login_and_save_session(username: str, password: str):
+    # 📁 Sessiya fayli uchun papka mavjudligini tekshirish va yaratish
+    os.makedirs(os.path.dirname(SESSION_PATH), exist_ok=True)
+
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         context = browser.new_context(storage_state=None)
@@ -19,10 +21,10 @@ def login_and_save_session(username: str, password: str):
         page.click("button[type='submit']")
         time.sleep(5)
 
-        # Check login success
+        # 🔐 2 bosqichli tasdiq (2FA) chiqqan-chiqmaganini tekshirish
         if "challenge" in page.url:
             raise Exception("Login challenge (2FA?) needed, can't proceed.")
 
-        # Sessionni saqlash
+        # 💾 Sessiyani faylga saqlash
         context.storage_state(path=SESSION_PATH)
         browser.close()
